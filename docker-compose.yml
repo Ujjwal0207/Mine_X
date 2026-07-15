@@ -1,0 +1,24 @@
+# Phase 1: Single PostgreSQL instance
+# Later phases add Redis, RabbitMQ, replicas, etc.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: minix-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: minix
+      POSTGRES_PASSWORD: minix_dev
+      POSTGRES_DB: minix
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U minix -d minix"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
