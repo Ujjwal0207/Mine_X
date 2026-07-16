@@ -1,30 +1,19 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth";
-import postRoutes from "./routes/posts";
+import appRouter from "./app";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
+const INSTANCE_ID = process.env.INSTANCE_ID || "write-1";
 
 app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
-
-app.get("/health", (_req, res) => {
-  res.json({
-    status: "ok",
-    service: "minix-api",
-    phase: 1,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-app.use("/api/auth", authRoutes);
-app.use("/api/posts", postRoutes);
+app.use(appRouter);
 
 app.listen(PORT, () => {
-  console.log(`Mini X API running on http://localhost:${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`Write Service [${INSTANCE_ID}] → http://localhost:${PORT}`);
+  console.log(`Role: write-heavy (auth, post creation, cache invalidation)`);
 });
