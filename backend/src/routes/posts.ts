@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../config/db";
+import { invalidatePostCaches } from "../config/redis";
 import { AuthRequest, authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -9,20 +10,7 @@ const createPostSchema = z.object({
   content: z.string().min(1).max(280),
 });
 
-router.get("/", async (_req, res: Response) => {
-  const posts = await prisma.post.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 50,
-    include: {
-      author: {
-        select: { id: true, username: true, name: true },
-      },
-    },
-  });
-
-  res.json({ posts });
-});
-
+// Write-heavy: only mutations live here. Reads go to Python read-service.
 router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
   const parsed = createPostSchema.safeParse(req.body);
 
@@ -43,25 +31,9 @@ router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
     },
   });
 
+  await invalidatePostCaches(post.id);
+
   res.status(201).json({ post });
-});
-
-router.get("/:id", async (req, res: Response) => {
-  const post = await prisma.post.findUnique({
-    where: { id: req.params.id },
-    include: {
-      author: {
-        select: { id: true, username: true, name: true },
-      },
-    },
-  });
-
-  if (!post) {
-    res.status(404).json({ error: "Post not found" });
-    return;
-  }
-
-  res.json({ post });
 });
 
 export default router;
