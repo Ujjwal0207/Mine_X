@@ -7,3 +7,11 @@ build/
 .DS_Store
 coverage/
 .vite/
+
+# Local dev log — personal phase tracker (not for git)
+PROJECT_TRACKER.md
+# Local planning
+Problems/
+
+# Local patch files
+changes.patch
