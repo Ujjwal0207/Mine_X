@@ -531,7 +531,7 @@ See the full plan in [docs/ROADMAP.md](docs/ROADMAP.md).
 | [docs/phase-1.md](docs/phase-1.md) | Phase 1 architecture and interview notes |
 | [docs/phase-2-3.md](docs/phase-2-3.md) | Phase 2-3 deep dive (cache, LB, read/write split) |
 
----
+<!-- ---
 
 ## Cost
 
@@ -546,7 +546,7 @@ See the full plan in [docs/ROADMAP.md](docs/ROADMAP.md).
 
 No credit card. No subscriptions. No billing risk.
 
----
+--- -->
 
 ## License
 
