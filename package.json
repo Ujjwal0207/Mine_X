@@ -1,0 +1,17 @@
+{
+  "name": "minix",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Mini X — Twitter-like HLD learning project",
+  "scripts": {
+    "infra": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "dev": "bash scripts/dev.sh",
+    "dev:write-1": "cd backend && INSTANCE_ID=write-1 PORT=3001 npm run dev",
+    "dev:write-2": "cd backend && INSTANCE_ID=write-2 PORT=3002 npm run dev",
+    "dev:read-1": "cd read-service && INSTANCE_ID=read-1 PORT=4001 python3 -m uvicorn app.main:app --reload --port 4001",
+    "dev:read-2": "cd read-service && INSTANCE_ID=read-2 PORT=4002 python3 -m uvicorn app.main:app --reload --port 4002",
+    "dev:frontend": "cd frontend && npm run dev",
+    "setup": "cd backend && npm install && npm run db:push && cd ../frontend && npm install && cd ../read-service && pip3 install -r requirements.txt"
+  }
+}
