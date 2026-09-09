@@ -2,17 +2,38 @@ node_modules/
 dist/
 build/
 .env
-.env.local
+.env.*
+!.env.example
 *.log
 .DS_Store
+Thumbs.db
 coverage/
 .vite/
 *.tsbuildinfo
+
+# Python cache and virtual environments (read-service)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# IDE and Editor settings
+.vscode/
+.idea/
+
+# Local databases
+*.sqlite
+*.sqlite3
+*.db
 
 # Local dev log — personal phase tracker (not for git)
 PROJECT_TRACKER.md
 MINE_WORLD_EXPLANATION.md
 mine_world_explanation.md
+
 # Local planning
 Problems/
 
