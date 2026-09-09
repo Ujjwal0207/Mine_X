@@ -9,12 +9,14 @@
     "dev:2": "INSTANCE_ID=write-2 PORT=3002 tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "worker": "tsx watch src/worker.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
+    "amqplib": "^2.0.1",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -24,6 +26,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.8",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
