@@ -12,6 +12,7 @@
     "dev:read-1": "cd read-service && INSTANCE_ID=read-1 PORT=4001 python3 -m uvicorn app.main:app --reload --port 4001",
     "dev:read-2": "cd read-service && INSTANCE_ID=read-2 PORT=4002 python3 -m uvicorn app.main:app --reload --port 4002",
     "dev:frontend": "cd frontend && npm run dev",
+    "dev:worker": "cd backend && npm run worker",
     "setup": "cd backend && npm install && npm run db:push && cd ../frontend && npm install && cd ../read-service && pip3 install -r requirements.txt"
   }
 }
