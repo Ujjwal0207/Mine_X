@@ -42,23 +42,26 @@ This document tracks what gets built in each phase and why.
 
 See [docs/phase-2-3.md](phase-2-3.md).
 
----
-
-## Phase 4 — Background Jobs (RabbitMQ)
+## Phase 4 — Background Jobs (RabbitMQ) ✅ (Current)
 
 **Goal:** Don't block the API for slow work.
 
-**What we add:**
-- RabbitMQ container
-- Worker process for async tasks
-- Fan-out notifications when someone posts
-- Retry logic for failed jobs
+**What we built:**
+- RabbitMQ message broker with Topic Exchange (`minix.events`)
+- Background Worker process (`backend/src/worker.ts`) consuming `post.created`
+- Automatic mention extraction (`@username`) and `Notification` generation
+- Hashtag tracking (`#tag`)
+- Dead-Letter Queue (DLQ) (`post.created.dlq`) with exponential retry logic
+- Notification API endpoints (`/api/notifications`) and UI drawer in React
 
 **HLD concepts:**
 - Message queues
 - Producer-consumer pattern
 - Async processing
 - Decoupling services
+- Dead-letter queues (DLQ) & message durability
+
+See [docs/phase-4.md](phase-4.md).
 
 ---
 
