@@ -30,10 +30,13 @@ function localGatewayPlugin(): Plugin {
 
         const useNginx = process.env.USE_NGINX === "true";
 
+        // Extract pathname without query string (e.g. /api/posts?limit=50 -> /api/posts)
+        const pathname = url.split("?")[0];
+
         // Check if this is a post read request (GET /api/posts or GET /api/posts/...)
         const isPostRead =
           req.method === "GET" &&
-          (url === "/api/posts" || url.startsWith("/api/posts/"));
+          (pathname === "/api/posts" || pathname.startsWith("/api/posts/"));
 
         // Determine destination port
         const targetPort = useNginx
