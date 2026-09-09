@@ -37,6 +37,6 @@ async def health():
         "status": "ok",
         "service": "read-service",
         "instance": INSTANCE_ID,
-        "phase": "2-3",
+        "phase": "4",
         "role": "read-heavy",
     }
