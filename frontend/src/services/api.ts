@@ -1,4 +1,4 @@
-import type { User, Post } from "../types";
+import type { User, Post, Notification } from "../types";
 
 const API_BASE = "";
 
@@ -66,5 +66,20 @@ export const api = {
     request<{ post: Post }>("/api/posts", {
       method: "POST",
       body: JSON.stringify({ content }),
+    }).then((r) => r.data),
+
+  getNotifications: () =>
+    request<{ notifications: Notification[]; unreadCount: number }>("/api/notifications").then(
+      (r) => r.data
+    ),
+
+  markNotificationRead: (id: string) =>
+    request<{ notification: Notification }>(`/api/notifications/${id}/read`, {
+      method: "PATCH",
+    }).then((r) => r.data),
+
+  markAllNotificationsRead: () =>
+    request<{ success: boolean }>("/api/notifications/read-all", {
+      method: "POST",
     }).then((r) => r.data),
 };
