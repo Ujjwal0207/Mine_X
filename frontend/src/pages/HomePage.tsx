@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { api, type ApiMeta } from "../services/api";
 import ComposeBox from "../components/ComposeBox";
 import PostCard from "../components/PostCard";
-import type { Post } from "../types";
+import type { Post, Notification } from "../types";
 
 export default function HomePage() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -12,6 +12,9 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [meta, setMeta] = useState<ApiMeta>({});
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const loadPosts = useCallback(async () => {
     try {
@@ -25,9 +28,45 @@ export default function HomePage() {
     }
   }, []);
 
+  const loadNotifications = useCallback(async () => {
+    if (!user) return;
+    try {
+      const data = await api.getNotifications();
+      setNotifications(data.notifications);
+      setUnreadCount(data.unreadCount);
+    } catch {
+      // Ignored if notifications service unavailable
+    }
+  }, [user]);
+
   useEffect(() => {
     loadPosts();
-  }, [loadPosts]);
+    loadNotifications();
+
+    const interval = setInterval(() => {
+      loadNotifications();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [loadPosts, loadNotifications]);
+
+  const handleMarkRead = async (id: string) => {
+    try {
+      await api.markNotificationRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
+    } catch {}
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.markAllNotificationsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch {}
+  };
 
   if (authLoading) return <div className="loading">Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
@@ -39,9 +78,22 @@ export default function HomePage() {
           <div className="top-bar">
             <span>
               Home
-              <span className="phase-badge">Phase 2-3</span>
+              <span className="phase-badge">Phase 4 (RabbitMQ)</span>
             </span>
             <div className="user-info">
+              <button
+                type="button"
+                className={`btn-notification ${unreadCount > 0 ? "has-unread" : ""}`}
+                onClick={() => {
+                  setShowNotifications((s) => {
+                    if (!s) void loadNotifications();
+                    return !s;
+                  });
+                }}
+                title="Notifications from RabbitMQ workers"
+              >
+                🔔 {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+              </button>
               <span>@{user.username}</span>
               <button className="btn-secondary" onClick={logout}>
                 Log out
@@ -49,6 +101,49 @@ export default function HomePage() {
             </div>
           </div>
         </header>
+
+        {showNotifications && (
+          <div className="notifications-drawer">
+            <div className="notifications-header">
+              <h3>Notifications (RabbitMQ Worker)</h3>
+              {unreadCount > 0 && (
+                <button className="btn-text" onClick={handleMarkAllRead}>
+                  Mark all as read
+                </button>
+              )}
+            </div>
+            {notifications.length === 0 ? (
+              <p className="notification-meta">No notifications yet. Tag someone with @username to test!</p>
+            ) : (
+              <div className="notifications-list">
+                {notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    className={`notification-card ${!n.read ? "unread" : ""}`}
+                  >
+                    <div>
+                      <p>{n.content}</p>
+                      <span className="notification-meta">
+                        {new Date(n.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    {!n.read && (
+                      <button
+                        className="btn-mark-read"
+                        onClick={() => handleMarkRead(n.id)}
+                      >
+                        Read
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {meta.service && (
           <div className="system-info">
@@ -59,6 +154,7 @@ export default function HomePage() {
                 Redis {meta.cache}
               </span>
             )}
+            <span className="system-tag">RabbitMQ Events: ON</span>
             <button className="btn-refresh" onClick={loadPosts} type="button">
               Refresh feed
             </button>
@@ -69,6 +165,7 @@ export default function HomePage() {
           onPostCreated={(post) => {
             setPosts((prev) => [post, ...prev]);
             setMeta((prev) => ({ ...prev, cache: "INVALIDATED" }));
+            setTimeout(loadNotifications, 1000); // Reload notifications after worker processes
           }}
         />
 
