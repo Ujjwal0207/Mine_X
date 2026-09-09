@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { z } from "zod";
 import { prisma } from "../config/db";
 import { invalidatePostCaches } from "../config/redis";
+import { publishEvent, ROUTING_KEYS } from "../config/rabbitmq";
 import { AuthRequest, authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -32,6 +33,20 @@ router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
   });
 
   await invalidatePostCaches(post.id);
+
+  // Publish event to RabbitMQ for async worker processing (mentions, notifications, trends)
+  void publishEvent(ROUTING_KEYS.POST_CREATED, {
+    eventId: `evt_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    type: "POST_CREATED",
+    timestamp: new Date().toISOString(),
+    data: {
+      postId: post.id,
+      content: post.content,
+      authorId: post.author.id,
+      authorUsername: post.author.username,
+      authorName: post.author.name,
+    },
+  });
 
   res.status(201).json({ post });
 });
