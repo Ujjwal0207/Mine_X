@@ -17,3 +17,19 @@ export interface Post {
     name: string;
   };
 }
+
+export interface Notification {
+  id: string;
+  userId: string;
+  actorId: string;
+  actor: {
+    id: string;
+    username: string;
+    name: string;
+  };
+  type: string;
+  entityId?: string;
+  content: string;
+  read: boolean;
+  createdAt: string;
+}
