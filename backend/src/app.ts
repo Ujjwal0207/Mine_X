@@ -1,6 +1,7 @@
 import { Router, Response, NextFunction } from "express";
 import postRoutes from "./routes/posts";
 import authRoutes from "./routes/auth";
+import notificationRoutes from "./routes/notifications";
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get("/health", (_req, res) => {
     status: "ok",
     service: "write-service",
     instance: process.env.INSTANCE_ID || "write-1",
-    phase: "2-3",
+    phase: "4",
     role: "write-heavy",
     timestamp: new Date().toISOString(),
   });
@@ -23,5 +24,6 @@ router.get("/health", (_req, res) => {
 
 router.use("/api/auth", authRoutes);
 router.use("/api/posts", postRoutes);
+router.use("/api/notifications", notificationRoutes);
 
 export default router;
